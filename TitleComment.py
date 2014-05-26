@@ -32,7 +32,7 @@ class InsertTitleCommand(sublime_plugin.TextCommand):
         indent = view.rowcol(sel[0].begin())[1]
 
         #build the string
-        line1 ="//"
+        line1 = "//"
         for i in range(indent + 2, 80):
             line1 += "-"
 
