@@ -1,5 +1,5 @@
 import sublime, sublime_plugin
-import png, math, array, os
+import lib/png, math, array, os
 
 class InsertAsciiArtPromptCommand(sublime_plugin.WindowCommand):
 
