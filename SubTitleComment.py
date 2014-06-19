@@ -6,18 +6,17 @@ class InsertSubTitlePromptCommand(sublime_plugin.WindowCommand):
 
     def run(self):
 
-        self.window.show_input_panel("Insert Sub Title:", "", self.on_done, None, None)
-        pass
+        self.window.show_input_panel(
+            "Insert Sub Title:", "", self.on_done, None, None)
 
     def on_done(self, text):
 
         try:
-
             name = str(text)
             name = name.upper()
             if self.window.active_view():
-                self.window.active_view().run_command("insert_sub_title", {"name": name} )
-
+                self.window.active_view().run_command(
+                    "insert_sub_title", {"name": name} )
         except ValueError:
             pass
 
