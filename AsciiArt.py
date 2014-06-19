@@ -1,12 +1,16 @@
 import sublime, sublime_plugin
-import lib.png, math, array, os
+from lib import png
+import math, array, os
+
+LINE_LENTH = 80.0
 
 class InsertAsciiArtPromptCommand(sublime_plugin.WindowCommand):
 
     def run(self):
 
-        self.window.show_input_panel("Path to png image:", "", self.on_done, None, None)
-        pass
+        self.window.show_input_panel(
+            "Path to png image:", "", self.on_done, None, None)
+
 
     def on_done(self, text):
 
@@ -14,7 +18,8 @@ class InsertAsciiArtPromptCommand(sublime_plugin.WindowCommand):
 
             filename = str(text)
             if self.window.active_view():
-                self.window.run_command("ascii_art_size_prompt", {"filename": filename} )
+                self.window.run_command(
+                    "ascii_art_size_prompt", {"filename": filename})
 
         except ValueError:
             pass
@@ -26,17 +31,18 @@ class AsciiArtSizePromptCommand(sublime_plugin.WindowCommand):
     def run(self, filename):
 
         self.f = filename
-        self.window.show_input_panel("Size of image (where 1 is full size, 2 is half size and so on):", "", self.on_done, None, None)
-        pass
+        self.window.show_input_panel(
+            "Size of image (where 1 is full size, 2 is half size and so on):",
+            "", self.on_done, None, None)
+
 
     def on_done(self, text):
 
         try:
-
             size = int(text)
             if self.window.active_view():
-                self.window.active_view().run_command("insert_ascii_art", {"filename": self.f, "size": size} )
-
+                self.window.active_view().run_command(
+                    "insert_ascii_art", {"filename": self.f, "size": size})
         except ValueError:
             pass
 
@@ -45,8 +51,7 @@ class InsertAsciiArtCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, filename, size):
 
-        filename = str(os.path.expanduser(filename))
-        file = open(filename)
+        file = open(os.path.expanduser(filename))
 
         view = self.view
         sel  = view.sel()
@@ -56,10 +61,9 @@ class InsertAsciiArtCommand(sublime_plugin.TextCommand):
         w, h, pixels, metadata = reader.read_flat()
         pixelWidth = 4 if metadata["alpha"] else 3
 
-        #TODO: average skipped data
         #iterate over the image to get the characters for the pixels
         text = "/*\n"
-        scale = int(math.ceil(w / 80.0)) * size
+        scale = int(math.ceil(w / LINE_LENTH)) * size
         for y in range (0, h, scale * 2):
             for x in range(0, w * pixelWidth, pixelWidth * scale):
 
@@ -77,13 +81,17 @@ class InsertAsciiArtCommand(sublime_plugin.TextCommand):
                             break
 
                         count += 1
-                        value =  256 - pixels[(x + (i * pixelWidth)) + (w * pixelWidth * (y + j))]
-                        value += 256 - pixels[(x + (i * pixelWidth)) + (w * pixelWidth * (y + j)) + 1]
-                        value += 256 - pixels[(x + (i * pixelWidth)) + (w * pixelWidth * (y + j)) + 2]
+                        value =  256 - pixels[((x + (i * pixelWidth)) +
+                            (w * pixelWidth * (y + j)))]
+                        value += 256 - pixels[((x + (i * pixelWidth)) +
+                            (w * pixelWidth * (y + j)) + 1)]
+                        value += 256 - pixels[((x + (i * pixelWidth)) +
+                            (w * pixelWidth * (y + j)) + 2)]
                         value /= 3
 
                         if (pixelWidth == 4):
-                            value *= pixels[(x + (i * pixelWidth))  + (w * pixelWidth * (y + j)) + 3] / 255
+                            value *= (pixels[(x + (i * pixelWidth)) +
+                                (w * pixelWidth * (y + j)) + 3] / 255)
 
                         sumVal += value
 
@@ -92,6 +100,7 @@ class InsertAsciiArtCommand(sublime_plugin.TextCommand):
                     break
                 sumVal /= count
 
+                #get the ascii character we are going to use
                 if (sumVal == 0):
                     text += " "
                 elif (sumVal <= 32):
@@ -115,5 +124,6 @@ class InsertAsciiArtCommand(sublime_plugin.TextCommand):
 
         text += "*/\n"
 
-        #place the title in the buffer
+        #place the ascii image in the buffer
         self.view.insert(edit, self.view.sel()[0].begin(), text)
+
