@@ -35,7 +35,7 @@ class InsertSubTitleCommand(sublime_plugin.TextCommand):
         title = "//"
         title += "-" * (((LINE_LENGTH - indent - len(name)) / 2) - 1)
         title += name
-        title += "-" * (LINE_LENGTH - len(title))
+        title += "-" * ((LINE_LENGTH - indent) - len(title))
 
         #place the title in the buffer
         self.view.insert(edit, self.view.sel()[0].begin(), title)
